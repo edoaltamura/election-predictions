@@ -9,6 +9,7 @@ def to_csv(df, path):
     df.loc[-1] = df.dtypes
     df.index = df.index + 1
     df.sort_index(inplace=True)
+
     # Then save it to a csv
     df.to_csv(path, index=False)
 
@@ -38,7 +39,7 @@ if not os.path.exists(raw_data_file):
 
 clean_data_file = f'../{path_interim:s}/dataland_polling.csv'
 
-if not os.path.exists(clean_data_file):
+if os.path.exists(clean_data_file):
 
     df = pd.read_csv(raw_data_file)
 
@@ -57,6 +58,10 @@ if not os.path.exists(clean_data_file):
 
     df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%y')
     df['Pollster'] = df['Pollster'].apply(str)
+
+    # Sort by date and group by pollster
+    df.sort_values(['Date', 'Pollster'], ignore_index=True, inplace=True)
+    df.reset_index(drop=True, inplace=True)
 
     to_csv(df, f'../{path_interim:s}/dataland_polling.csv')
 
