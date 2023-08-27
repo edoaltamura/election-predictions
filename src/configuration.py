@@ -1,0 +1,5 @@
+path_raw = 'data/01_raw'
+path_interim = 'data/02_interim'
+path_processed = 'data/03_processed'
+path_external = 'data/external'
+path_reports = 'reports'

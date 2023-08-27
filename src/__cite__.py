@@ -7,7 +7,7 @@ __date_last_update__ = '2023-08-25'
 try:
     import git
 
-    repo = git.Repo("../l")
+    repo = git.Repo("../")
     tree = repo.tree()
     for blob in tree:
         commit = next(repo.iter_commits(paths=blob.path, max_count=1))
