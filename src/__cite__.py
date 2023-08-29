@@ -1,13 +1,15 @@
 import warnings
 import datetime
+import os.path
 
+from .configuration import path_project
 # Fetch the date of last commit from the parent directory. Initialise to the creation date.
 __date_last_update__ = '2023-08-25'
 
 try:
     import git
 
-    repo = git.Repo("../")
+    repo = git.Repo(path_project)
     tree = repo.tree()
     for blob in tree:
         commit = next(repo.iter_commits(paths=blob.path, max_count=1))
@@ -24,7 +26,7 @@ except:
                   UserWarning)
 
 # Fetch the version from the base file
-with open("./__version__.py", "r") as fh:
+with open(os.path.join(path_project, "src", "__version__.py"), "r") as fh:
     exec_output = {}
     exec(fh.read(), exec_output)
     __version__ = exec_output["__version__"]

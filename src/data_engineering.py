@@ -1,11 +1,21 @@
 import os
 import pandas as pd
+from typing import Optional
 
-from configuration import path_raw, path_interim
+from .configuration import cfg_paths
+from .pipeline import measure, development
+
+URL = "https://cdn-dev.economistdatateam.com/jobs/pds/code-test/index.html"
 
 
-def to_csv(df, path):
-    # Prepend dtypes to the top of df (from https://stackoverflow.com/a/43408736/7607701)
+def to_csv(df: pd.DataFrame, path: str) -> None:
+    """
+    Save Pandas dataframe to CSV. In addition ir preserves the dypes.
+    Prepend dtypes to the top of df (from https://stackoverflow.com/a/43408736/7607701)
+    :param df: Input dataframe
+    :param path: Output file path.
+    :return: None
+    """
     df.loc[-1] = df.dtypes
     df.index = df.index + 1
     df.sort_index(inplace=True)
@@ -14,9 +24,12 @@ def to_csv(df, path):
     df.to_csv(path, index=False)
 
 
-def read_csv(path):
-    # Read types first line of csv
-
+def read_csv(path: str) -> pd.DataFrame:
+    """
+    Read types first line of csv and returns the full DataFrame.
+    :param path: Input file path.
+    :return: DataFrame
+    """
     dtypes = {}
     parse_dates = []
     for k, v in pd.read_csv(path, nrows=1).iloc[0].to_dict().items():
@@ -30,41 +43,62 @@ def read_csv(path):
     return pd.read_csv(path, parse_dates=parse_dates, dtype=dtypes, skiprows=[1])
 
 
-raw_data_file = f'../{path_raw:s}/dataland_polling.csv'
+class DataEngineering:
 
-if not os.path.exists(raw_data_file):
-    url = "https://cdn-dev.economistdatateam.com/jobs/pds/code-test/index.html"
-    all_tables = pd.read_html(url)[0]
-    all_tables.to_csv(raw_data_file, index=False, na_rep='NaN', mode='w', sep=',')
+    def __init__(self, url: str = URL, path: Optional[str] = None, filename: str = "dataland_polling.csv",
+                 reset: bool = False) -> None:
+        self.url = url
+        self.path = path
+        self.filename = filename
 
-clean_data_file = f'../{path_interim:s}/dataland_polling.csv'
+        # Initialise empty dataframe
+        self.data = pd.DataFrame()
 
-if os.path.exists(clean_data_file):
+        self.raw_data_file = os.path.join(cfg_paths.data.raw, self.filename)
+        if not os.path.exists(self.raw_data_file) or reset:
+            self.load_from_url()
 
-    df = pd.read_csv(raw_data_file)
-
-    # Create a new column with True for rows containing '*' and False otherwise
-    df['Excludes overseas territories'] = df['Sample'].str.contains('\*', regex=True)
-    df['Sample'] = pd.to_numeric(df['Sample'].str.replace('\*', '', regex=True).str.replace(',', ''), errors='coerce',
-                                 downcast='integer')
-
-    df['Included in alternate question'] = df['Chettam'].str.contains('\*\*', regex=True).fillna(False)
-    df['Chettam'] = df['Chettam'].str.replace('\*\*', '', regex=True).str.rstrip('%')
-    df['Chettam'] = pd.to_numeric(df['Chettam'], errors='coerce', downcast='float') / 100.0
-
-    # Convert percentage signs
-    for col in ['Bulstrode', 'Lydgate', 'Vincy', 'Casaubon', 'Others']:
-        df[col] = df[col].str.rstrip('%').astype('float') / 100.0
-
-    df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%y')
-    df['Pollster'] = df['Pollster'].apply(str)
-
-    # Sort by date and group by pollster
-    df.sort_values(['Date', 'Pollster'], ignore_index=True, inplace=True)
-    df.reset_index(drop=True, inplace=True)
-
-    to_csv(df, f'../{path_interim:s}/dataland_polling.csv')
+        self.clean_data_file = os.path.join(cfg_paths.data.interim, self.filename)
+        if not os.path.exists(self.clean_data_file) or reset:
+            self.clean_data()
 
 
-df = read_csv(clean_data_file)
-print(df.dtypes)
+    @development
+    @measure
+    def load_from_url(self):
+        self.data = pd.read_html(self.url)[0]
+        self.data.to_csv(self.raw_data_file, index=False, na_rep='NaN', mode='w', sep=',')
+
+    @development
+    def clean_data(self):
+
+        if self.data.empty:
+            self.data = pd.read_csv(self.raw_data_file)
+
+        # Create a new column with True for rows containing '*' and False otherwise
+        self.data['Excludes overseas territories'] = self.data['Sample'].str.contains('\*', regex=True)
+        self.data['Sample'] = self.data['Sample'].str.replace('\*', '', regex=True).str.replace(',', '')
+        self.data['Sample'] = pd.to_numeric(self.data['Sample'], errors='coerce', downcast='integer')
+
+        self.data['Included in alternate question'] = self.data['Chettam'].str.contains('\*\*', regex=True)
+        self.data['Included in alternate question'].fillna(False, inplace=True)
+        self.data['Chettam'] = self.data['Chettam'].str.replace('\*\*', '', regex=True).str.rstrip('%')
+        self.data['Chettam'] = pd.to_numeric(self.data['Chettam'], errors='coerce', downcast='float') / 100.0
+
+        # Convert percentage signs into fractions
+        for col in ['Bulstrode', 'Lydgate', 'Vincy', 'Casaubon', 'Others']:
+            self.data[col] = self.data[col].str.rstrip('%').astype('float') / 100.0
+
+        self.data['Date'] = pd.to_datetime(self.data['Date'], format='%m/%d/%y')
+        self.data['Pollster'] = self.data['Pollster'].apply(str)
+
+        # Sort by date and group by pollster
+        self.data.sort_values(['Date', 'Pollster'], ignore_index=True, inplace=True)
+        self.data.reset_index(drop=True, inplace=True)
+
+        # Interpolate time series
+
+        # Account for double counts
+
+        to_csv(self.data, self.clean_data_file)
+
