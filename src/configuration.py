@@ -51,6 +51,7 @@ class _DataConfigPaths:
 class ConfigPaths:
     reports: str = os.path.join(path_project, 'reports')
     notebooks: str = os.path.join(path_project, 'notebooks')
+    mplstyles: str = os.path.join(path_project, 'src', 'mplstyles')
     data: _DataConfigPaths = _DataConfigPaths()
 
     def __repr__(self):

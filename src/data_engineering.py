@@ -8,41 +8,6 @@ from .pipeline import measure, development
 URL = "https://cdn-dev.economistdatateam.com/jobs/pds/code-test/index.html"
 
 
-def to_csv(df: pd.DataFrame, path: str) -> None:
-    """
-    Save Pandas dataframe to CSV. In addition ir preserves the dypes.
-    Prepend dtypes to the top of df (from https://stackoverflow.com/a/43408736/7607701)
-    :param df: Input dataframe
-    :param path: Output file path.
-    :return: None
-    """
-    df.loc[-1] = df.dtypes
-    df.index = df.index + 1
-    df.sort_index(inplace=True)
-
-    # Then save it to a csv
-    df.to_csv(path, index=False)
-
-
-def read_csv(path: str) -> pd.DataFrame:
-    """
-    Read types first line of csv and returns the full DataFrame.
-    :param path: Input file path.
-    :return: DataFrame
-    """
-    dtypes = {}
-    parse_dates = []
-    for k, v in pd.read_csv(path, nrows=1).iloc[0].to_dict().items():
-        if 'datetime64[ns]' in v:
-            dtypes[k] = 'object'
-            parse_dates.append(k)
-        else:
-            dtypes[k] = v
-
-    # Read the rest of the lines with the types from above
-    return pd.read_csv(path, parse_dates=parse_dates, dtype=dtypes, skiprows=[1])
-
-
 class DataEngineering:
 
     def __init__(self, url: str = URL, path: Optional[str] = None, filename: str = "dataland_polling.csv",
@@ -62,15 +27,55 @@ class DataEngineering:
         if not os.path.exists(self.clean_data_file) or reset:
             self.clean_data()
 
-
-    @development
     @measure
-    def load_from_url(self):
+    def load_from_url(self) -> pd.DataFrame:
         self.data = pd.read_html(self.url)[0]
         self.data.to_csv(self.raw_data_file, index=False, na_rep='NaN', mode='w', sep=',')
+        return self.data
+
+    def load_from_file(self) -> pd.DataFrame:
+        self.data = self.read_csv(self.clean_data_file)
+        return self.data
+
+    @staticmethod
+    def to_csv(df: pd.DataFrame, path: str) -> None:
+        """
+        Overload the Pandas method to write dtypes explicitly.
+        Save Pandas dataframe to CSV. In addition ir preserves the dypes.
+        Prepend dtypes to the top of df (from https://stackoverflow.com/a/43408736/7607701)
+        :param df: Input dataframe
+        :param path: Output file path.
+        :return: None
+        """
+        df.loc[-1] = df.dtypes
+        df.index = df.index + 1
+        df.sort_index(inplace=True)
+
+        # Then save it to a csv
+        df.to_csv(path, index=False)
+
+    @staticmethod
+    def read_csv(path: str) -> pd.DataFrame:
+        """
+        Overload the Pandas method to read and allocate dtypes explicitly.
+        Read types first line of csv and returns the full DataFrame.
+        :param path: Input file path.
+        :return: DataFrame
+        """
+        dtypes = {}
+        parse_dates = []
+        for k, v in pd.read_csv(path, nrows=1).iloc[0].to_dict().items():
+            if 'datetime64[ns]' in v:
+                dtypes[k] = 'object'
+                parse_dates.append(k)
+            else:
+                dtypes[k] = v
+
+        # Read the rest of the lines with the types from above
+        return pd.read_csv(path, parse_dates=parse_dates, dtype=dtypes, skiprows=[1])
 
     @development
-    def clean_data(self):
+    def clean_data(self) -> None:
 
         if self.data.empty:
             self.data = pd.read_csv(self.raw_data_file)
@@ -96,9 +101,10 @@ class DataEngineering:
         self.data.sort_values(['Date', 'Pollster'], ignore_index=True, inplace=True)
         self.data.reset_index(drop=True, inplace=True)
 
-        # Interpolate time series
-
         # Account for double counts
 
-        to_csv(self.data, self.clean_data_file)
+        # Interpolate time series
+        # self.data.index = self.data['Date']
+        # self.data = self.data.resample('12h').interpolate().resample('D').asfreq().dropna()
 
+        self.to_csv(self.data, self.clean_data_file)

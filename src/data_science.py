@@ -1,5 +1,7 @@
-from .data_engineering import read_csv, DataEngineering
+import pandas as pd
 
-df = read_csv(DataEngineering().clean_data_file)
-print(df.dtypes)
 
+class DataScience:
+
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.data = df
