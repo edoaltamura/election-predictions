@@ -93,18 +93,36 @@ class DataEngineering:
         # Convert percentage signs into fractions
         for col in ['Bulstrode', 'Lydgate', 'Vincy', 'Casaubon', 'Others']:
             self.data[col] = self.data[col].str.rstrip('%').astype('float') / 100.0
+            # TODO: Some rows are badly formatted and don't have % sign. They are find though.
+            # Maybe write a detection algorithm and print a message.
 
         self.data['Date'] = pd.to_datetime(self.data['Date'], format='%m/%d/%y')
         self.data['Pollster'] = self.data['Pollster'].apply(str)
 
+        # Account for double counts
+        last = self.data[self.data.duplicated(subset=['Date', 'Pollster', 'Sample'], keep='first')]
+        assert last['Included in alternate question'].all()
+
+        first = self.data[self.data.duplicated(subset=['Date', 'Pollster', 'Sample'], keep='last')]
+        last.index = first.index
+        last.loc[first.index, 'Chettam'] = first['Chettam']
+
+        self.data.loc[last.index] = last
+        del first, last
+
+        self.data.reset_index(drop=True, inplace=True)
+        self.data.drop(['Included in alternate question'], inplace=True, axis=1)
+
         # Sort by date and group by pollster
-        self.data.sort_values(['Date', 'Pollster'], ignore_index=True, inplace=True)
+        self.data.sort_values(['Pollster', 'Date'], ignore_index=True, inplace=True)
         self.data.reset_index(drop=True, inplace=True)
 
-        # Account for double counts
-
-        # Interpolate time series
-        # self.data.index = self.data['Date']
-        # self.data = self.data.resample('12h').interpolate().resample('D').asfreq().dropna()
-
         self.to_csv(self.data, self.clean_data_file)
+
+    def split_pollsters(self):
+        pass
+
+    def regularise_times(self):
+        # Interpolate time series for each pollster
+        self.data.index = self.data['Date']
+        self.data = self.data.resample('12h').interpolate().resample('D').asfreq().dropna()

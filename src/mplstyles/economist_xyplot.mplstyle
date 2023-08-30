@@ -35,7 +35,7 @@ ytick.major.pad: -40            # distance to major tick label in points
 
 # Remove major and minor ticks except for on the x-axis.
 xtick.major.size: 5             # major tick size in points
-xtick.minor.size: 0             # minor tick size in points
+xtick.minor.size: 5             # minor tick size in points
 ytick.major.size: 0
 ytick.minor.size: 0
 
