@@ -4,14 +4,16 @@ from typing import Optional
 
 from .configuration import cfg_paths
 from .pipeline import measure, development
+from .io import IO
 
 URL = "https://cdn-dev.economistdatateam.com/jobs/pds/code-test/index.html"
 
 
-class DataEngineering:
+class DataEngineering(IO):
 
     def __init__(self, url: str = URL, path: Optional[str] = None, filename: str = "dataland_polling.csv",
                  reset: bool = False) -> None:
+        super().__init__()
         self.url = url
         self.path = path
         self.filename = filename
@@ -36,43 +38,6 @@ class DataEngineering:
     def load_from_file(self) -> pd.DataFrame:
         self.data = self.read_csv(self.clean_data_file)
         return self.data
-
-    @staticmethod
-    def to_csv(df: pd.DataFrame, path: str) -> None:
-        """
-        Overload the Pandas method to write dtypes explicitly.
-        Save Pandas dataframe to CSV. In addition ir preserves the dypes.
-        Prepend dtypes to the top of df (from https://stackoverflow.com/a/43408736/7607701)
-        :param df: Input dataframe
-        :param path: Output file path.
-        :return: None
-        """
-        df.loc[-1] = df.dtypes
-        df.index = df.index + 1
-        df.sort_index(inplace=True)
-
-        # Then save it to a csv
-        df.to_csv(path, index=False)
-
-    @staticmethod
-    def read_csv(path: str) -> pd.DataFrame:
-        """
-        Overload the Pandas method to read and allocate dtypes explicitly.
-        Read types first line of csv and returns the full DataFrame.
-        :param path: Input file path.
-        :return: DataFrame
-        """
-        dtypes = {}
-        parse_dates = []
-        for k, v in pd.read_csv(path, nrows=1).iloc[0].to_dict().items():
-            if 'datetime64[ns]' in v:
-                dtypes[k] = 'object'
-                parse_dates.append(k)
-            else:
-                dtypes[k] = v
-
-        # Read the rest of the lines with the types from above
-        return pd.read_csv(path, parse_dates=parse_dates, dtype=dtypes, skiprows=[1])
 
     @development
     def clean_data(self) -> None:
@@ -118,11 +83,3 @@ class DataEngineering:
         self.data.reset_index(drop=True, inplace=True)
 
         self.to_csv(self.data, self.clean_data_file)
-
-    def split_pollsters(self):
-        pass
-
-    def regularise_times(self):
-        # Interpolate time series for each pollster
-        self.data.index = self.data['Date']
-        self.data = self.data.resample('12h').interpolate().resample('D').asfreq().dropna()
