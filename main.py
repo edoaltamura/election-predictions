@@ -10,8 +10,10 @@ def main():
 
     from src import DataEngineering, DataScience
 
-    df = DataEngineering().load_from_file()
-    DataScience(df).regularise_time('Verity Insights')
+    de = DataEngineering()
+    de.clean_data()
+    df = de.load_from_file()
+    DataScience(df).split_pollsters(resample=True)
 
 
 # Press the green button in the gutter to run the script.
