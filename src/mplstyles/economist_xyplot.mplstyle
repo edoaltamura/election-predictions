@@ -19,6 +19,7 @@ axes.grid.axis: y               # which axis the grid should apply to
 grid.linewidth: 1               # in points
 grid.color: A5A5A5              # grid color
 axes.axisbelow: True            # Sets axis gridlines below lines and patches.
+axes.facecolor: D9E3E9
 
 # Move tick labels to right side
 ytick.labelleft: False          # draw tick labels on the left side
@@ -60,7 +61,7 @@ figure.dpi: 150                 # figure dots per inch
 
 # Properties for saving the figure. Ensure a high DPI when saving so we have a good resolution.
 savefig.dpi:       300          # figure dots per inch or 'figure'
-savefig.facecolor: white        # figure face color when saving
+savefig.facecolor: D9E3E9      # figure face color when saving
 savefig.bbox:      tight        # {tight, standard}
 savefig.pad_inches:   0.5       # padding when bbox is set to tight
 

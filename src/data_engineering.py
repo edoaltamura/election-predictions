@@ -44,7 +44,7 @@ URL: str = "https://cdn-dev.economistdatateam.com/jobs/pds/code-test/index.html"
 class DataEngineering(IO):
 
     def __init__(self, url: str = URL, path: Optional[str] = None, filename: str = "dataland_polling.csv",
-                 reset: bool = False) -> None:
+                 reset: bool = False, save_copy_in_final: bool = True) -> None:
         """
         Initialize a DataEngineering instance for data loading and cleaning.
 
@@ -55,22 +55,27 @@ class DataEngineering(IO):
         :param path: The path where the data files will be saved.
         :param filename: The name of the data file.
         :param reset: If True, reset and reload the data even if it exists.
+        :param save_copy_in_final: If True, also saves a copy of the clean dataset in the `final` data directory.
         """
         super().__init__()
         self.url = url
         self.path = path
         self.filename = filename
 
-        # Initialise empty dataframe
-        self.data = pd.DataFrame()
-
         self.raw_data_file = os.path.join(cfg_paths.data.raw, self.filename)
-        if not os.path.exists(self.raw_data_file) or reset:
+        if not os.path.isfile(self.raw_data_file) or reset:
+            # Initialise empty dataframe
+            self.data = pd.DataFrame()
             self.load_from_url()
 
         self.clean_data_file = os.path.join(cfg_paths.data.interim, self.filename)
-        if not os.path.exists(self.clean_data_file) or reset:
+        if not hasattr(self, 'data'):
+            self.data = self.load_from_file()
+
+        if not os.path.isfile(self.clean_data_file) or reset:
             self.clean_data()
+
+        self.save_clean_data(save_copy_in_final=save_copy_in_final)
 
     @measure
     def load_from_url(self) -> pd.DataFrame:
@@ -114,7 +119,7 @@ class DataEngineering(IO):
         return self.data
 
     @development
-    def clean_data(self) -> None:
+    def clean_data(self) -> pd.DataFrame:
         """
         Clean and preprocess the loaded data in place.
 
@@ -123,11 +128,13 @@ class DataEngineering(IO):
 
         Note: This method is decorated with a development decorator (eg @development) for development purposes.
 
+        :return: DataFrame containing the cleaned data.
+
         Example usage:
             ```python
             data_engineering = DataEngineering(url='https://example.com/data.csv')
-            data_engineering.clean_data()
-            cleaned_data = data_engineering.data
+            cleaned_data = data_engineering.clean_data() # To return a copy of the DataFrame
+            cleaned_data = data_engineering.data # To generate the cleaned DataFrame in place and get it as attribute
             ```
         """
         if self.data.empty:
@@ -140,14 +147,26 @@ class DataEngineering(IO):
 
         self.data['Included in alternate question'] = self.data['Chettam'].str.contains('\*\*', regex=True)
         self.data['Included in alternate question'].fillna(False, inplace=True)
-        self.data['Chettam'] = self.data['Chettam'].str.replace('\*\*', '', regex=True).str.rstrip('%')
-        self.data['Chettam'] = pd.to_numeric(self.data['Chettam'], errors='coerce', downcast='float') / 100.0
 
         # Convert percentage signs into fractions
-        for col in ['Bulstrode', 'Lydgate', 'Vincy', 'Casaubon', 'Others']:
-            self.data[col] = self.data[col].str.rstrip('%').astype('float') / 100.0
-            # TODO: Some rows are badly formatted and don't have % sign. They are find though.
-            # Maybe write a detection algorithm and print a message.
+        for col in ['Bulstrode', 'Lydgate', 'Chettam', 'Vincy', 'Casaubon', 'Others']:
+
+            # Default formatting has the % sign, so detect the elements that have it to flag those that do not.
+            mask = self.data[col].str.contains('%', na=False)
+
+            # `Chettam` contains double asterisks and requires additional processing
+            if col == 'Chettam':
+                self.data[col] = self.data[col].str.replace('\*\*', '', regex=True).str.rstrip('%')
+                self.data[col] = pd.to_numeric(self.data[col], errors='coerce', downcast='float') / 100.0
+
+            else:
+                self.data[col] = self.data[col].str.rstrip('%').astype('float') / 100.0
+
+            # Detect and print messages for badly formatted rows
+            badly_formatted_rows = self.data.loc[~mask]
+
+            if not badly_formatted_rows.empty:
+                print(f"Found {len(badly_formatted_rows):d} badly formatted rows in column '{col}':")
 
         self.data['Date'] = pd.to_datetime(self.data['Date'], format='%m/%d/%y')
         self.data['Pollster'] = self.data['Pollster'].apply(str)
@@ -187,4 +206,27 @@ class DataEngineering(IO):
         self.data.sort_values(['Pollster', 'Date'], ignore_index=True, inplace=True)
         self.data.reset_index(drop=True, inplace=True)
 
+        return self.data
+
+    def save_clean_data(self, save_copy_in_final: bool = True) -> None:
+        """
+        Save the cleaned data to a CSV file and optionally save a copy in the final data directory.
+
+        :param save_copy_in_final: Whether to save a copy of the cleaned data in the final data directory. Defaults to True.
+
+        Example usage:
+            ```python
+            data_engineering = DataEngineering(url='https://example.com/data.csv')
+
+            # Save the cleaned data to a CSV file (default behavior).
+            data_engineering.save_clean_data()
+
+            # Save the cleaned data to a CSV file and skip saving a copy in the final data directory.
+            data_engineering.save_clean_data(save_copy_in_final=False)
+            ```
+        """
+
         self.to_csv(self.data, self.clean_data_file)
+
+        if save_copy_in_final:
+            self.data.to_csv(os.path.join(cfg_paths.data.final, 'polls.csv'))
