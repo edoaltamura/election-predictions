@@ -19,7 +19,7 @@ def test_empty_data_handling(data_engineering):
 def test_cleaning_operations(data_engineering):
     # Test various cleaning operations on the data
     data_engineering.clean_data()
-    assert 'Excludes overseas territories' in data_engineering.data.columns
+    assert 'Excludes overseas candidates' in data_engineering.data.columns
     assert 'Sample' not in data_engineering.data['Sample'].str.contains('*').any()
     assert 'Chettam' not in data_engineering.data['Chettam'].str.contains('**').any()
     assert 'Chettam' not in data_engineering.data['Chettam'].str.contains('%').any()

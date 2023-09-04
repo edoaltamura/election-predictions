@@ -134,7 +134,7 @@ class DataEngineering(IO):
             self.data = pd.read_csv(self.raw_data_file)
 
         # Create a new column with True for rows containing '*' and False otherwise
-        self.data['Excludes overseas territories'] = self.data['Sample'].str.contains('\*', regex=True)
+        self.data['Excludes overseas candidates'] = self.data['Sample'].str.contains('\*', regex=True)
         self.data['Sample'] = self.data['Sample'].str.replace('\*', '', regex=True).str.replace(',', '')
         self.data['Sample'] = pd.to_numeric(self.data['Sample'], errors='coerce', downcast='integer')
 

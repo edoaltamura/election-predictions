@@ -6,7 +6,7 @@ import tempfile
 from src import io
 
 sample_columns: str = "Date,Pollster,Sample,Bulstrode,Lydgate,Vincy,Casaubon,Chettam,Others,Excludes overseas " \
-                      "territories "
+                      "candidates "
 
 sample_dtypes: str = "datetime64[ns],object,int16,float64,float64,float64,float64,float32,float64,bool"
 

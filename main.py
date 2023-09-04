@@ -13,7 +13,11 @@ def main():
     de = DataEngineering()
     de.clean_data()
     df = de.load_from_file()
-    DataScience(df).split_pollsters(resample=True)
+    ds = DataScience(df)
+    ds.split_pollsters(resample=True)
+    dfs = ds.compute_polling_averages()
+    print(dfs)
+    ds.dump_results(dfs)
 
 
 # Press the green button in the gutter to run the script.
