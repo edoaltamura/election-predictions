@@ -96,7 +96,47 @@ pip install .
 
 ## Graphic design
 
-The layout attempts to match the style of the plots in _The Economist_ using `matplotlib` style sheets and dynamic aspect ratio scaling.
+The layout attempts to match the style of the plots in _The Economist_ 's 'Graphic detail' using `matplotlib` style sheets and dynamic aspect ratio scaling. Find out more in the Matplotlib stylesheet at `src/mplstyles/economist_xyplot.mplstyle` and the `src/visualisation.py` submodule.
+
+Example usage:
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+from src import PlotTimeSeries  # Import the PlotTimeSeries class
+
+# Create a sample DataFrame (replace this with your own data)
+data = {
+    'Date': pd.date_range(start='2023-01-01', periods=365),
+    'Bulstrode': [0.1 * i for i in range(365)],
+    'Lydgate': [0.15 * i for i in range(365)],
+    'Vincy': [0.08 * i for i in range(365)],
+}
+
+df = pd.DataFrame(data)
+
+# Create an instance of PlotTimeSeries
+plt_ts = PlotTimeSeries()
+
+# Get the figure and axes objects
+fig, ax = plt_ts.get_panels()
+
+# Plot the data for each candidate
+for candidate in ['Bulstrode', 'Lydgate', 'Vincy']:
+    ax.plot(df['Date'], df[candidate], label=candidate)
+
+# Set titles and labels
+plt_ts.set_title('Candidate Polling Trends', subtitle='Fraction of candidate polling, %/100')
+plt_ts.set_source('Dataland political archive 2023', pad=0.15)
+
+# Add a legend
+ax.legend(fontsize=10, loc='upper left', frameon=True, framealpha=0.85)
+
+# Save the plot
+plt_ts.savefig('my_awesome_economist_figure.png', dpi=300)
+
+# Show the plot (if you want to display it)
+plt.show()
+```
 
 ## Expected output from `main.py`
 ```commandline
