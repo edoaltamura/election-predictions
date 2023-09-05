@@ -22,6 +22,10 @@ On Windows-based systems, you can type
 ```commandline
 python main.py
 ```
+#### Where are my outputs?
+The project structure, based on `cookiecutter` and `kedro`, demands that the final data products should be saved in `data\03_final\`, while the figures and insights should be saved in `reports\`.
+
+The configuration of the projects structure is managed, at low level, by the `src/configuration.py` submodule.
 
 ## Features and FAQs
 
@@ -196,6 +200,12 @@ Writing dataset 'polling_averages.csv' to: > <local-hot-directory>\election-pred
 Writing dataset 'trends.csv' to: > <local-hot-directory>\election-predictions\data\03_final\trends.csv
 Figure test.png saved in reports directory.
 ```
+
+## Report a bug or request a new feature
+To report bugs and request new updates, log your query in the GitHub Issues.
+
+## Contribute to this repository
+We would love to receive your contributions! Fork this repository in you GitHub, develop the features you would like to see implemented, and then submit a pull request. 
 
 ## Cite this software
 You can print an up-to-date `bibtex` citation handle via:
