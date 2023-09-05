@@ -92,7 +92,7 @@ def inspect_imported_modules() -> None:
 def main() -> int:
     # Run the data engineering pipeline to clean the raw inputs
     de = DataEngineering(reset=True)  # reset=True starts from scraping the URL, False uses locally saved data.
-    print('\nA view of the clean data:\n', de.data.head(5))
+    print('\nA glimpse of the clean data:\n', de.data.head(10))
 
     # Run the data science pipeline to generate the outputs
     ds = DataScience(de.data)

@@ -361,7 +361,7 @@ class DataScience(IO):
             # Save these files in the `final` data directory
             file_path = os.path.join(cfg_paths.data.final, f'{filename:s}.csv')
 
-            print(f"Writing dataset {filename:s} to: {file_path:s}")
+            print(f"Writing dataset '{filename:s}.csv' to: > {file_path:s}")
             if 'average' in filename:
                 self.to_csv(df, file_path)
             else:
