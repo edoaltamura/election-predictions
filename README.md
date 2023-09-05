@@ -96,7 +96,7 @@ pip install .
 
 ## Graphic design
 
-The layout attempts to match the style of the plots in _The Economist_ 's 'Graphic detail' using `matplotlib` style sheets and dynamic aspect ratio scaling. Find out more in the Matplotlib stylesheet at `src/mplstyles/economist_xyplot.mplstyle` and the `src/visualisation.py` submodule.
+The layout attempts to match the style of the plots in _The Economist_ 's [Graphic detail](https://www.economist.com/graphic-detail?utm_medium=cpc.adword.pd&utm_source=google&ppccampaignID=18151738051&ppcadID=&utm_campaign=a.22brand_pmax&utm_content=conversion.direct-response.anonymous&gclid=Cj0KCQjwgNanBhDUARIsAAeIcAvIXMRR0ecYNG1wFTmK1J8uDBE1V-EE7ic7LtNSwpX3vn8ITqD58BsaAiu3EALw_wcB&gclsrc=aw.ds) using `matplotlib` style sheets and dynamic aspect ratio scaling. Find out more in the Matplotlib stylesheet at `src/mplstyles/economist_xyplot.mplstyle` and the `src/visualisation.py` submodule.
 
 Example usage:
 ```python
