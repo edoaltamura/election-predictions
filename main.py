@@ -76,7 +76,7 @@ def plot_trends(df: DataFrame) -> None:
     plt_ts.set_source('Dataland political archive 2023-24', pad=0.15)
 
     ax.legend(fontsize=10, loc='center left', frameon=True, framealpha=0.85)
-    plt_ts.savefig('test.png', dpi=250)
+    plt_ts.savefig('polling_trends.png', dpi=250)
 
 
 def inspect_imported_modules() -> None:
