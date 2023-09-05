@@ -8,6 +8,9 @@ with open("src/__version__.py", "r") as fh:
     exec(fh.read(), exec_output)
     __version__ = exec_output["__version__"]
 
+with open("requirements.txt", "r") as f:
+    required = f.read().splitlines()
+
 setuptools.setup(
     name="election-predictions",
     version=__version__,
@@ -26,17 +29,6 @@ setuptools.setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-      "numpy",
-      "unyt",
-      "scipy",
-      "matplotlib",
-      "attrs",
-      "pytest",
-      "black",
-      "tqdm",
-      "velociraptor",
-      "swiftsimio"
-    ],
+    install_requires=required,
     include_package_data=True,
 )

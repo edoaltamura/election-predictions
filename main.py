@@ -79,7 +79,17 @@ def plot_trends(df: DataFrame) -> None:
     plt_ts.savefig('test.png', dpi=250)
 
 
-def main():
+def inspect_imported_modules() -> None:
+    """
+    Lists the modules used that are not included in the standard library
+    :return: None
+    """
+    for i in sys.modules.keys():
+        if not i.startswith('_') and '.' not in i and i not in sys.builtin_module_names :
+            print(i)
+
+
+def main() -> int:
     # Run the data engineering pipeline to clean the raw inputs
     de = DataEngineering(reset=True)  # reset=True starts from scraping the URL, False uses locally saved data.
     print('\nA view of the clean data:\n', de.data.head(5))
@@ -91,6 +101,9 @@ def main():
     # Make a plot and visualise the trends
     plot_trends(trends)
 
+    return 0
+
 
 if __name__ == '__main__':
     main()
+    # inspect_imported_modules()
