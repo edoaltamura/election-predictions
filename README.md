@@ -1,5 +1,6 @@
 # Elections trends & forecast
-
+[![Python version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/swiftzoom/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/edoaltamura/swiftzoom/blob/main/LICENSE.md)
 
 A Python framework for analysing current trends and predicting election outcomes from polling data.
 
