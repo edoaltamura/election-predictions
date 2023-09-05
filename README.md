@@ -1,5 +1,6 @@
-Election forecast
----
+# Elections trends & forecast
+
+
 A Python framework for analysing current trends and predicting election outcomes from polling data.
 
 ![Test image](reports/test.png)
@@ -19,6 +20,41 @@ On Windows-based systems, you can type
 ```commandline
 python main.py
 ```
+
+## Features and FAQs
+
+#### Some days have no polls, some have multiple
+For each pollster, days without polls are interpolated if bracketed by days with polls. If different pollsters have provided answers on the same day, these data are considered separately when splitting by pollster. If the same pollster gave two answers on the same day (eg 'University of Bellville-sur-Mer'), then the most recent data is considered.
+
+#### Some pollsters do not include line items for all candidates
+The missing candidates are assigned a zero weighting in the weighted average calculation. If one pollster gave two answers on the same day, one of which contains the missing information, then the entries are joined (`SQL UNION OUTER`). A related question, which would be instrumental for probing pollster bias would be "**Why** did a pollster not include line items for all candidates?" 
+
+#### Some pollsters will conduct multiple polls with 'hypotheticals' (eg what if this candidate dropped out?)
+This case could manifest itself as the pollster excluding a candidate from the survey, and consequently not providing data for that candidate. To detect and account for this case, more information about the pollster's decisions is required. 
+
+#### The order of candidates on the page may change
+The schema assumes a data warehouse, where the order is consistent. Given the current information, it is not possible to reliably determine whether the order of candidates was swapped. An estimate could be made by detecting outliers from the trend, however, this technique gives outcomes which are degenerate with a sudden change of political opinions. 
+
+For a datalake-like schema, additional features can guarantee that the data warehouse layer is consistent. This feature may be introduced with bindings to [schema](https://github.com/keleshev/schema).
+
+#### Formatting may be inconsistent
+This behaviour is detected and accounted for by the `DataEngineering.clean_data()` method. Lines which are badly formatted (eg missing `%`) are regularised to the rest of the document. Informative messages are also printed to `sys.stdout`.
+
+#### Opinions can shift suddenly
+A rolling average (as in `data/03_final/trends.csv`) cannot promptly capture time-variation features happening quicker than the smoothing time-scale. For this reason, it is useful to consider then raw weighted average of the polling results without any smoothing, as reported in `data/03_final/polling_averages.csv`. This distribution is noisier, but is robust at capturing quick variations in public opinion.
+
+#### A candidate might drop out or join the race late
+Drop-outs up to two weeks are interpolated, provided that the candidate rejoins, and their electoral campaign contemplated by pollsters.
+If a candidate joins late or drops out early, we assign zero weight to the dates where pollsters provided no data about the candidate. If a candidate drops out without intention of re-joining the run, then additional information is required (eg public announcement). In this case, the time-series can simply be truncated and the polling fractions re-normalised with the remaining candidates.  
+
+#### There may be big gaps in the polling record (for example, around Christmas or for this country’s two-week public holiday in June)
+Without additional information of opinion shifts during this time, we can assume that opinions remain stationary, or vary smoothly. In the current implementation, the polling values during gaps of up to two weeks are interpolated. In the future, we will integrate a public-holiday list that enables multi-week interpolation only for public holidays, and not for instance when a candidate drops out and joins again (unless it coincides with a public holiday). 
+
+#### There may be significant data entry errors
+The `DataEngineering` class can promptly be extended with additional features that detect, optimise and resolve errors which are discovered during the data exploration phases. Some errors, such as logging, should be addressed in the future data lake schema, while programmatic cleaning should be implemented in the `src/data_engineering.py` submodule.
+
+#### Notes might be attached to specific polls or numbers
+This behaviour is detected and accounted for by the `DataEngineering.clean_data()` method. Lines which contain special indicators (eg `*`) are flagged with a `bool` value. The boolean information is then appended onto a new column for further processing.
 
 ## Set-up
 ### By creating a virtual environment
@@ -48,7 +84,7 @@ This feature is currently under testing, and we recommend setting up the reposit
 After cloning the repository to a local host, enter the `election-predictions` directory
 - `dir election-predictions` on Windows
 - `cd election-predictions` on Unix systems
-- 
+
 and run
 ```commandline
 pip install . 
