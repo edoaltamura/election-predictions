@@ -62,6 +62,63 @@ pip install .
 
 The layout attempts to match the style of the plots in _The Economist_ using `matplotlib` style sheets and dynamic aspect ratio scaling.
 
+## Expected output from `main.py`
+```commandline
+$ python main.py
+
+⏱ | Calling load_from_url()
+⏱ | Done: load_from_url() took 0.3231 sec
+Found 22 badly formatted rows in column 'Bulstrode':
+Found 22 badly formatted rows in column 'Lydgate':
+Found 90 badly formatted rows in column 'Chettam':
+Found 51 badly formatted rows in column 'Vincy':
+Found 38 badly formatted rows in column 'Casaubon':
+Found 22 badly formatted rows in column 'Others':
+Some pollsters have given multiple responses:
+	['University of Bellville-sur-Mer']
+Considering only the most recent information:
+	[Timestamp('2024-03-22 00:00:00'), Timestamp('2024-02-23 00:00:00'), Timestamp('2024-01-26 00:00:00')]
+Dropping rows: {first.index}
+
+A glimpse of the clean data:
+         Date          Pollster  ...  Others  Excludes overseas candidates
+0 2023-10-12  Bardi University  ...   0.171                         False
+1 2023-10-18  Bardi University  ...   0.078                         False
+2 2023-10-24  Bardi University  ...   0.074                         False
+3 2023-10-30  Bardi University  ...   0.083                         False
+4 2023-11-05  Bardi University  ...   0.155                         False
+5 2023-11-11  Bardi University  ...   0.112                         False
+6 2023-11-17  Bardi University  ...   0.099                         False
+7 2023-11-23  Bardi University  ...   0.091                         False
+8 2023-11-29  Bardi University  ...   0.141                         False
+9 2023-12-05  Bardi University  ...   0.115                         False
+
+[10 rows x 10 columns]
+Splitting 'Verity Insights': 100%|██████████| 11/11 [00:00<00:00, 89.56it/s]
+Candidate average for 'Bulstrode':   0%|          | 0/6 [00:00<?, ?it/s]<local-hot-directory>\election-predictions\src\data_science.py:284: RuntimeWarning: 
+Pollster 'Calvo Group' only gave 1 reports. This behaviour is accounted for in the weighted averages, but you should investigate this pollster's data further.
+  warn(
+Candidate average for 'Lydgate':  17%|█▋        | 1/6 [00:00<00:03,  1.36it/s]  <local-hot-directory>\election-predictions\src\data_science.py:284: RuntimeWarning: 
+Pollster 'Calvo Group' only gave 1 reports. This behaviour is accounted for in the weighted averages, but you should investigate this pollster's data further.
+  warn(
+Candidate average for 'Vincy':  17%|█▋        | 1/6 [00:00<00:03,  1.36it/s]  <local-hot-directory>\election-predictions\src\data_science.py:284: RuntimeWarning: 
+Pollster 'Calvo Group' only gave 1 reports. This behaviour is accounted for in the weighted averages, but you should investigate this pollster's data further.
+  warn(
+Candidate average for 'Casaubon':  50%|█████     | 3/6 [00:00<00:00,  3.97it/s]<local-hot-directory>\election-predictions\src\data_science.py:284: RuntimeWarning: 
+Pollster 'Calvo Group' only gave 1 reports. This behaviour is accounted for in the weighted averages, but you should investigate this pollster's data further.
+  warn(
+Candidate average for 'Chettam':  50%|█████     | 3/6 [00:00<00:00,  3.97it/s] <local-hot-directory>\election-predictions\src\data_science.py:284: RuntimeWarning: 
+Pollster 'Calvo Group' only gave 1 reports. This behaviour is accounted for in the weighted averages, but you should investigate this pollster's data further.
+  warn(
+Candidate average for 'Others':  83%|████████▎ | 5/6 [00:01<00:00,  5.86it/s] <local-hot-directory>\election-predictions\src\data_science.py:284: RuntimeWarning: 
+Pollster 'Calvo Group' only gave 1 reports. This behaviour is accounted for in the weighted averages, but you should investigate this pollster's data further.
+  warn(
+Candidate average for 'Others': 100%|██████████| 6/6 [00:01<00:00,  5.14it/s]
+Writing dataset 'polling_averages.csv' to: > <local-hot-directory>\election-predictions\data\03_final\polling_averages.csv
+Writing dataset 'trends.csv' to: > <local-hot-directory>\election-predictions\data\03_final\trends.csv
+Figure test.png saved in reports directory.
+```
+
 ## Cite this software
 You can print an up-to-date `bibtex` citation handle via:
 ```python
