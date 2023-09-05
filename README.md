@@ -58,7 +58,7 @@ The `DataEngineering` class can promptly be extended with additional features th
 #### Notes might be attached to specific polls or numbers
 This behaviour is detected and accounted for by the `DataEngineering.clean_data()` method. Lines which contain special indicators (eg `*`) are flagged with a `bool` value. The boolean information is then appended onto a new column for further processing.
 
-## Set-up
+## Set up
 ### By creating a virtual environment
 Assuming you have installed `venv` and `virtualenv` and have an up-to-date version of `pip` (see [instructions](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)), you can follow this two-step guide to set up this Python library and get it up and running in your system. The election-prediction code was developed to be compatible across all platform, however we will assume the Windows-native `python` run command in what follows, rather than the Unix-native `python3`.
 - Create a virtual environment for this project, and activate it.
