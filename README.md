@@ -23,7 +23,7 @@ On Windows-based systems, you can type
 python main.py
 ```
 #### Where are my outputs?
-The project structure, based on `cookiecutter` and `kedro`, demands that the final data products should be saved in `data\03_final\`, while the figures and insights should be saved in `reports\`.
+The project structure, based on `cookiecutter` and `kedro`, demands that the final data products should be saved in `data/03_final/`, while the figures and insights should be saved in `reports/`.
 
 The configuration of the projects structure is managed, at low level, by the `src/configuration.py` submodule.
 
